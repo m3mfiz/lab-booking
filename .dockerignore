@@ -1,0 +1,8 @@
+node_modules
+.git
+.omc
+.claude
+*.log
+.env
+packages/client/dist
+packages/server/dist

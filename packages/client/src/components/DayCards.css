@@ -1,0 +1,114 @@
+.day-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0;
+}
+
+.day-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px 18px;
+  border: none;
+  border-radius: var(--radius);
+  background: white;
+  cursor: pointer;
+  transition: all var(--transition);
+  text-align: left;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: var(--shadow);
+}
+
+.day-card:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.day-card:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+/* Status colors — modern gradients */
+.day-card--free {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  border-left: 4px solid var(--success);
+}
+
+.day-card--partial {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border-left: 4px solid var(--warning);
+}
+
+.day-card--full {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border-left: 4px solid var(--danger);
+}
+
+.day-card--disabled {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-left: 4px solid #cbd5e1;
+}
+
+/* Today highlight */
+.day-card--today {
+  box-shadow: var(--shadow-md), 0 0 0 2px var(--primary);
+}
+
+.day-card__name {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  width: 36px;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+.day-card__date {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text);
+  width: 40px;
+  text-align: center;
+  flex-shrink: 0;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.day-card__month {
+  font-size: 13px;
+  color: var(--text-muted);
+  width: 36px;
+  flex-shrink: 0;
+}
+
+.day-card__status {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: var(--radius-full);
+}
+
+.day-card--free .day-card__status {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+}
+
+.day-card--partial .day-card__status {
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+}
+
+.day-card--full .day-card__status {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+}
+
+.day-card--disabled .day-card__status {
+  background: rgba(148, 163, 184, 0.12);
+  color: #94a3b8;
+}

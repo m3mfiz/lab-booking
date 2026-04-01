@@ -1,0 +1,15 @@
+{
+  "name": "lab-booking",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "dev:server": "npm -w packages/server run dev",
+    "dev:client": "npm -w packages/client run dev",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "build": "npm -w packages/client run build",
+    "db:setup": "npm -w packages/server run db:migrate && npm -w packages/server run db:seed"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
