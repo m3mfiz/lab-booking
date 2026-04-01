@@ -118,6 +118,24 @@ export async function createBooking(
   const result = await db.transaction(async (tx) => {
     await tx.execute(sql`SELECT 1 FROM computer_labs WHERE id = ${labId} FOR UPDATE`);
 
+    // Check if user already has an overlapping booking
+    const [userOverlap] = await tx
+      .select({ count: sql<number>`COUNT(*)::int` })
+      .from(bookings)
+      .where(
+        and(
+          eq(bookings.user_id, userId),
+          eq(bookings.lab_id, labId),
+          eq(bookings.status, 'active'),
+          lt(bookings.start_time, endTime),
+          gt(bookings.end_time, startTime)
+        )
+      );
+
+    if ((userOverlap?.count ?? 0) > 0) {
+      throw AppError.conflict('У вас уже есть бронирование на это время');
+    }
+
     const [countRow] = await tx
       .select({ count: sql<number>`COUNT(*)::int` })
       .from(bookings)

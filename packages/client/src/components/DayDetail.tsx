@@ -7,6 +7,7 @@ import {
   getMinutes,
 } from 'date-fns';
 import { createBookingApi } from '../api/bookings';
+import { useAuth } from '../context/AuthContext';
 import type { Booking, LabSettings } from '../types';
 import './DayDetail.css';
 
@@ -19,11 +20,13 @@ interface DayDetailProps {
 }
 
 export function DayDetail({ day, bookings, settings, onBack, onRefetch }: DayDetailProps) {
+  const { user } = useAuth();
   const [anchorHour, setAnchorHour] = useState<number | null>(null);
   const [rangeEnd, setRangeEnd] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [shakingHour, setShakingHour] = useState<number | null>(null);
+  const [showToast, setShowToast] = useState(false);
   const submittingRef = useRef(false);
   const shakeTimer = useRef<ReturnType<typeof setTimeout>>();
 
@@ -70,6 +73,23 @@ export function DayDetail({ day, bookings, settings, onBack, onRefetch }: DayDet
     }
     return map;
   }, [bookings, dayStr]);
+
+  // Set of hours where current user has a booking
+  const myHours = useMemo(() => {
+    const set = new Set<number>();
+    if (!user) return set;
+    for (const b of bookings) {
+      if (b.status !== 'active' || b.user_id !== user.id) continue;
+      const start = parseISO(b.start_time);
+      const end = parseISO(b.end_time);
+      const startDate = format(start, 'yyyy-MM-dd');
+      if (startDate !== dayStr) continue;
+      const startH = getHours(start);
+      const rawEndH = getHours(end) + (getMinutes(end) > 0 ? 1 : 0);
+      for (let h = startH; h < rawEndH; h++) set.add(h);
+    }
+    return set;
+  }, [bookings, dayStr, user]);
 
   // Set of full hours
   const fullHours = useMemo(() => {
@@ -159,6 +179,8 @@ export function DayDetail({ day, bookings, settings, onBack, onRefetch }: DayDet
       setAnchorHour(null);
       setRangeEnd(null);
       onRefetch();
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 2500);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка бронирования');
     } finally {
@@ -180,6 +202,7 @@ export function DayDetail({ day, bookings, settings, onBack, onRefetch }: DayDet
 
   return (
     <div className="day-detail">
+      <div className={`toast${showToast ? ' toast--visible' : ''}`}>Бронирование создано!</div>
       <div className="day-detail__header">
         <button className="btn-secondary day-detail__back" onClick={onBack}>
           ← Назад
@@ -189,21 +212,21 @@ export function DayDetail({ day, bookings, settings, onBack, onRefetch }: DayDet
 
       <div className="day-detail__grid">
         {hours.map((hour) => {
-          const hBookings = hourBookings.get(hour) ?? [];
           const isFull = fullHours.has(hour);
           const isSelected = selectedHours.has(hour);
-          const hasBookings = hBookings.length > 0 && !isFull;
+          const isMine = myHours.has(hour);
           const isShaking = shakingHour === hour;
 
           const classes = [
             'slot-tile',
             isSelected && 'slot-tile--selected',
             isFull && 'slot-tile--full',
+            isMine && !isSelected && !isFull && 'slot-tile--mine',
             isShaking && 'slot-tile--shake',
           ].filter(Boolean).join(' ');
 
           const label = `${String(hour).padStart(2, '0')}:00 — ${
-            isFull ? 'недоступно' : isSelected ? 'выбрано' : 'свободно'
+            isFull ? 'недоступно' : isMine ? 'ваше бронирование' : isSelected ? 'выбрано' : 'свободно'
           }`;
 
           return (
@@ -216,7 +239,6 @@ export function DayDetail({ day, bookings, settings, onBack, onRefetch }: DayDet
               onClick={() => isSelected ? handleSelectedTap(hour) : handleTileTap(hour)}
             >
               {String(hour).padStart(2, '0')}:00
-              {hasBookings && <span className="slot-tile__dot" />}
             </button>
           );
         })}

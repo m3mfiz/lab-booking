@@ -25,6 +25,7 @@ export function BookingModal({ date, initialHour, totalSeats, onClose, onSuccess
   const [availableSeats, setAvailableSeats] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
     if (!startTime || !endTime || startTime >= endTime) {
@@ -58,7 +59,11 @@ export function BookingModal({ date, initialHour, totalSeats, onClose, onSuccess
       const end = new Date(`${date}T${endTime}:00`).toISOString();
       await createBookingApi(start, end);
       onSuccess();
-      onClose();
+      setShowToast(true);
+      setTimeout(() => {
+        setShowToast(false);
+        onClose();
+      }, 1500);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Не удалось создать бронирование');
     } finally {
@@ -70,6 +75,7 @@ export function BookingModal({ date, initialHour, totalSeats, onClose, onSuccess
 
   return (
     <div className="modal-overlay" onClick={onClose}>
+      <div className={`toast${showToast ? ' toast--visible' : ''}`}>Бронирование создано!</div>
       <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>Новое бронирование</h2>

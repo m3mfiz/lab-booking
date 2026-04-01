@@ -90,16 +90,11 @@
   pointer-events: none;
 }
 
-/* Yellow dot for existing bookings */
-.slot-tile__dot {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--warning);
-  box-shadow: 0 0 0 1.5px white;
+/* User's own booking */
+.slot-tile--mine {
+  background: #dbeafe;
+  border-color: #93c5fd;
+  color: var(--primary);
 }
 
 /* Book bar */
